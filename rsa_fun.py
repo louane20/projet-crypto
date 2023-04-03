@@ -11,7 +11,7 @@ def gcd(a, b):
     return b
 
 
-############ pour trouver l'inverse###############
+############ pour trouver l'inverse (euclide etendue)###############
 def findModInverse(a, m):
     # Return the modular inverse of a % m, which is
     # the number x such that a*x % m = 1
@@ -28,7 +28,7 @@ def findModInverse(a, m):
     return u1 % m
 
 
-########################################################
+#######################################################
 
 def primeSieve(sieveSize):
 
@@ -105,39 +105,40 @@ def generatee(size):
            return num
 #generatee(2048)
 
+######################## generationde des cles#############
 def generateKey(sizeofkey):
     # Creates a public/private keys keySize bits in size.
     p = 0
     q = 0
     # Step 1: Create two prime numbers, p and q. Calculate n = p * q.
-    print('Generating p & q primes...')
+    #print('Generating p & q primes...')
     while p == q:
         p = generatee(sizeofkey)
         q = generatee(sizeofkey)
-        print('p:',p)
-        print('q:',q)
+        #print('p:',p)
+        #print('q:',q)
     n = p * q
 
     # Step 2: Create a number e that is relatively prime to (p-1)*(q-1):
-    print('Generating e that is relatively prime to (p-1)*(q-1)...')
+    #print('Generating e that is relatively prime to (p-1)*(q-1)...')
     nbr=1
     while nbr<2:
 
         # Keep trying random numbers for e until one is valid:
         e = random.randrange(2 ** (sizeofkey- 1), 2 ** (sizeofkey))
         if gcd(e, (p - 1) * (q - 1)) == 1:
-            print(e)
+            #print(e)
             nbr=nbr+1
         
 
     # Step 3: Calculate d, the mod inverse of e:
-    print('Calculating d that is mod inverse of e...')
+    #print('Calculating d that is mod inverse of e...')
     d = findModInverse(e, (p - 1) * (q - 1))
-    print(d)
+    #print(d)
     publicKey = (n, e)
     privateKey = (n, d)
-    print('Public key:',publicKey)
-    print('Private key:',privateKey)
+    #print('Public key:',publicKey)
+    #print('Private key:',privateKey)
     return (publicKey, privateKey)
 #generateKey(2048)
 
@@ -168,6 +169,10 @@ def makeKeyFiles(name, sizeofkey):
     fo.write('%s,%s,%s' % (sizeofkey, privateKey[0], privateKey[1]))
     fo.close()
 #makeKeyFiles('nour', 1024)
+
+
+################ file public #################
+
 
 ############################ rsa incryption ##########################""""""
 # IMPORTANT: The block size MUST be less than or equal to the key size!
@@ -215,6 +220,7 @@ def readKeyFile(keyFilename):
     return (int(keySize), int(n), int(EorD))
 
 
+
 def encryptAndWriteToFile(messageFilename, keyFilename, message, blockSize=DEFAULT_BLOCK_SIZE):
     # Using a key from a key file, encrypt the message and save it to a
     # file. Returns the encrypted message string.
@@ -237,6 +243,7 @@ def encryptAndWriteToFile(messageFilename, keyFilename, message, blockSize=DEFAU
     fo = open(messageFilename, 'w')
     fo.write(encryptedContent)
     fo.close()
+    encryptedContent = ('%s'% encryptedContent)
     # Also return the encrypted string.
     return encryptedContent
 ##################pour crypter le message #####################
@@ -308,8 +315,41 @@ def readFromFileAndDecrypt(messageFilename, keyFilename):
     return decryptMessage(encryptedBlocks, messageLength, (n, d), blockSize)
 
 
-keyFilename='nour_privkey.txt'
-messageFilename='nour_increption'
 
-decryptedText =readFromFileAndDecrypt(messageFilename, keyFilename)
-print(decryptedText)
+
+def readFromFileAndDecryptmesage(messagecrypt, keyFilename):
+    # Using a key from a key file, read an encrypted message from a file
+    # and then decrypt it. Returns the decrypted message string.
+    keySize, n, d = readKeyFile(keyFilename)
+
+
+    # Read in the message length and the encrypted message from the file.
+
+    messageLength, blockSize, encryptedMessage = messagecrypt.split('_')
+    messageLength = int(messageLength)
+    blockSize = int(blockSize)
+
+    # Check that key size is greater than block size.
+    if keySize < blockSize * 8: # * 8 to convert bytes to bits
+        sys.exit('ERROR: Block size is %s bits and key size is %s bits. The RSA cipher requires the block size to be equal to or greater than the key size. Did you specify the correct key file and encrypted file?' % (blockSize * 8, keySize))
+
+    # Convert the encrypted message into large int values.
+    encryptedBlocks = []
+    for block in encryptedMessage.split(','):
+        encryptedBlocks.append(int(block))
+
+    # Decrypt the large int values.
+    return decryptMessage(encryptedBlocks, messageLength, (n, d), blockSize)
+
+
+
+#keyFilename='nour_privkey.txt'
+#messageFilename='nour_increption'
+
+#decryptedText =readFromFileAndDecrypt(messageFilename, keyFilename)
+#print(decryptedText)
+#generateKey(128)
+
+
+#print(dinv)
+#inverse_chenese(198866004165963350957507043028492774619,218365783592873578759875069198602034640*220525153743148939577783238827306448726)
